@@ -11,35 +11,45 @@ import java.util.Set;
  * Created by marck on 03.12.2018.
  */
 public class DBConnect {
-
+    private String dbURL;
+    private String dbUSER;
+    private String dbPW;
     private Connection connection;
     private Statement statement;
     private ResultSet resultSet;
 
-    public static final Logger log = Logger.getLogger(DBConnect.class);
+//    public static final Logger log = Logger.getLogger(DBConnect.class);
 
-    public DBConnect() {
+    public DBConnect(String dbURL, String dbUSER, String dbPW) {
+        this.dbURL = dbURL;
+        this.dbUSER = dbUSER;
+        this.dbPW = dbPW;
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "");
+            connection = DriverManager.getConnection(dbURL, dbUSER, dbPW);
             statement = connection.createStatement();
-
         } catch (Exception ex) {
             System.out.println("Error: " + ex);
         }
-//        log.info("Connect with DB Successfully");
     }
 
-    public ArrayList<String> getData(String tableName, String columnName) {
-        ArrayList result = new ArrayList<String>();
-        try {
-            String query = "select * from " + tableName;
 
+    public ArrayList<String> getData(String tableName, String columnName, int searchID, ArrayList<String> columnNames) {
+        ArrayList result = new ArrayList<String>();
+
+        String query_SELECT = "SELECT *";
+        String query_FROM = " FROM `" + tableName + "` ";
+        String query_WHERE = " WHERE " + searchID;
+        String query = query_SELECT + query_FROM + query_WHERE;
+
+        try {
             resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
-                System.out.println(columnName);
-                result.add(resultSet.getString(columnName));
+                for (String column : columnNames) {
+                    result.add(resultSet.getString(column));
+                }
             }
         } catch (Exception ex) {
             System.out.println("Error: " + ex);
@@ -48,49 +58,71 @@ public class DBConnect {
         }
     }
 
-    public boolean insertData(String tableName, ArrayList<String> columnNames, ArrayList<String> values) {
+    public boolean insertInto(String tableName, ArrayList<String> columnNames, ArrayList<String> values) {
+        //   Z.b INSERT INTO Customer (FirstName, LastName, City, Country, Phone)
+        //   Z.b VALUES ('Craig', 'Smith', 'New York', 'USA', 1-01-993 2800)
+        int columnCounter = 0;
+        int valuesCounter = 0;
+        String query = "";
+        String query_INSERT_INTO = "INSERT INTO " + tableName + " (";
+        String query_VALUES = " VALUES (";
+
+        for (String columnName : columnNames) {
+            query_INSERT_INTO = query_INSERT_INTO + columnName;
+            if (columnCounter != columnNames.size() - 1) {
+                query_INSERT_INTO = query_INSERT_INTO + ",";
+            }
+            columnCounter++;
+        }
+        query_INSERT_INTO = query_INSERT_INTO + " )";
+
+        for (String value : values) {
+            query_VALUES = query_VALUES + "'" + value + "'";
+            if (valuesCounter != values.size() - 1) {
+                query_VALUES = query_VALUES + ",";
+            }
+            valuesCounter++;
+        }
+        query_VALUES = query_VALUES + ")";
+        query = "" + query_INSERT_INTO + query_VALUES;
         try {
-            //   Z.b INSERT INTO Customer (FirstName, LastName, City, Country, Phone)
-            //   Z.b VALUES ('Craig', 'Smith', 'New York', 'USA', 1-01-993 2800)
-            String query = "";
-            String query_INSERT_INTO = "INSERT INTO " + tableName + " (";
-            String query_VALUES = "VALUES (";
+            connection.createStatement().execute(query);
 
-            for (String columnName : columnNames) {
-                query_INSERT_INTO = query_INSERT_INTO + columnName + ",";
-            }
-            query_INSERT_INTO = query_INSERT_INTO + ")";
-
-
-            for (String value : values) {
-                query_VALUES = query_VALUES + value;
-
-            }
-            query_VALUES = query_VALUES + ")";
-
-            query = "" + query_INSERT_INTO.toString() + "/n " + query_VALUES;
-
-            connection.prepareStatement(query_INSERT_INTO);
-            resultSet = statement.executeQuery(query_VALUES);
-
-            pstmt.setString(1, name);
-            pstmt.setDouble(2, capacity);
-            pstmt.executeUpdate();
-            while (resultSet.next()) {
-
-                System.out.println(query_INSERT_INTO);
-                resultSet.getString(query_INSERT_INTO);
-
-                System.out.println(query_VALUES);
-                resultSet.getString(query_VALUES);
-
-                return true;
-            }
         } catch (Exception ex) {
             System.out.println("Error: " + ex);
             return false;
         }
         return false;
+    }
+
+
+    public void updateData(String tableName, ArrayList<String> columnNamesToUpdate, ArrayList<String> newValues, String idColumnName, int idColumnNameValue) {
+
+        int coumnCounter = 0;
+        String query = "";
+        String query_UPDATE = "UPDATE " + tableName + " (";
+        String query_SET = "SET ";
+        String query_WHERE = "WHERE " + idColumnName + " " + idColumnNameValue;
+
+
+        for (String column : columnNamesToUpdate) {
+            query_SET = query_SET + column + " `" + newValues.get(coumnCounter) + "`";
+            coumnCounter++;
+        }
+        query = query_SET + query_UPDATE + query_WHERE;
+
+        try {
+            connection.createStatement().execute(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void delete(String tableName, ArrayList<String> columnNames, ArrayList<String> values) {
+        String query = "";
+        String query_UPDATE = "UPDATE " + tableName + " (";
+        String query_SET = "INSERT INTO " + tableName + " (";
+        String query_WHERE = " VALUES (";
     }
 
 

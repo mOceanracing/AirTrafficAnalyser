@@ -1,5 +1,9 @@
 import controll.DBConnect;
+import controll.DBEntryModify;
+import model.Airplane;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,25 +13,9 @@ import java.util.List;
  * https://openflights.org/data.html
  */
 public class Main {
-    public static final Logger log = Logger.getLogger(DBConnect.class);
 
     public static void main(String[] args) {
-        DBConnect dbConnect = new DBConnect();
-
-        String tableName = "planes";
-        ArrayList<String> columnNames = new ArrayList<String>();
-        ArrayList<String> values = new ArrayList<String>();
-
-        columnNames.add("name");
-        columnNames.add("iata");
-        columnNames.add("icao");
-
-        values.add("`Boeing 787-8`,");
-        values.add("`787`,");
-        values.add("`B788`,");
-
-        dbConnect.insertData(tableName, columnNames, values);
-        //dbConnect.getData();
-        System.out.println("adsfsd");
+        DBEntryModify dbEntryModify = new DBEntryModify();
     }
+
 }
